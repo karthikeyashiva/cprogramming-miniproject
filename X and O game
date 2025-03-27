@@ -1,0 +1,112 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Node structure for storing moves history
+struct Move {
+    int row, col;
+    char player;
+    struct Move* next;
+};
+
+// Function to create a new move node
+struct Move* createMove(int row, int col, char player) {
+    struct Move* newMove = (struct Move*)malloc(sizeof(struct Move));
+    newMove->row = row;
+    newMove->col = col;
+    newMove->player = player;
+    newMove->next = NULL;
+    return newMove;
+}
+
+// Function to add a move to the linked list
+void addMove(struct Move** head, int row, int col, char player) {
+    struct Move* newMove = createMove(row, col, player);
+    newMove->next = *head;
+    *head = newMove;
+}
+
+// Function to display the moves history
+void displayMoves(struct Move* head) {
+    printf("\nMoves History:\n");
+    struct Move* temp = head;
+    while (temp != NULL) {
+        printf("Player %c -> Row: %d, Col: %d\n", temp->player, temp->row + 1, temp->col + 1);
+        temp = temp->next;
+    }
+}
+
+// Function to display the board
+void displayBoard(char board[3][3]) {
+    printf("\n");
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            printf(" %c ", board[i][j]);
+            if (j < 2) printf("|");
+        }
+        printf("\n");
+        if (i < 2) printf("---+---+---\n");
+    }
+    printf("\n");
+}
+
+// Function to check for a winner
+char checkWinner(char board[3][3]) {
+    for (int i = 0; i < 3; i++) {
+        if (board[i][0] == board[i][1] && board[i][1] == board[i][2] && board[i][0] != ' ')
+            return board[i][0];
+
+        if (board[0][i] == board[1][i] && board[1][i] == board[2][i] && board[0][i] != ' ')
+            return board[0][i];
+    }
+
+    if (board[0][0] == board[1][1] && board[1][1] == board[2][2] && board[0][0] != ' ')
+        return board[0][0];
+
+    if (board[0][2] == board[1][1] && board[1][1] == board[2][0] && board[0][2] != ' ')
+        return board[0][2];
+
+    return ' ';
+}
+
+// Main function
+int main() {
+    char board[3][3] = {{' ', ' ', ' '}, {' ', ' ', ' '}, {' ', ' ', ' '}};
+    struct Move* movesHistory = NULL;
+
+    int row, col, moves = 0;
+    char currentPlayer = 'X';
+    char winner = ' ';
+
+    while (moves < 9 && winner == ' ') {
+        displayBoard(board);
+        printf("Player %c, enter row (1-3) and column (1-3): ", currentPlayer);
+        scanf("%d %d", &row, &col);
+
+        row--; 
+        col--;
+
+        if (row >= 0 && row < 3 && col >= 0 && col < 3 && board[row][col] == ' ') {
+            board[row][col] = currentPlayer;
+            addMove(&movesHistory, row, col, currentPlayer);
+
+            winner = checkWinner(board);
+
+            currentPlayer = (currentPlayer == 'X') ? 'O' : 'X';
+            moves++;
+        } else {
+            printf("Invalid move. Try again.\n");
+        }
+    }
+
+    displayBoard(board);
+
+    if (winner != ' ') {
+        printf("Player %c wins!\n", (winner == 'X') ? 'X' : 'O');
+    } else {
+        printf("It's a draw!\n");
+    }
+
+    displayMoves(movesHistory);
+
+    return 0;
+}
